@@ -1,0 +1,75 @@
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+## green.example.com
+## blue.example.com
+## 192.168.100.1
+## 192.168.100.10
+
+# Ex 2: A collection of hosts belonging to the 'webservers' group
+
+## [webservers]
+## alpha.example.org
+## beta.example.org
+## 192.168.1.100
+## 192.168.1.110
+
+# If you have multiple hosts following a pattern you can specify
+# them like this:
+
+## www[001:006].example.com
+
+# Ex 3: A collection of database servers in the 'dbservers' group
+
+## [dbservers]
+## 
+## db01.intranet.mydomain.net
+## db02.intranet.mydomain.net
+## 10.25.1.56
+## 10.25.1.57
+
+# Here's another example of host ranges, this time there are no
+# leading 0s:
+
+## db-[99:101]-node.example.com
+
+[k8sm]
+192.168.160.9  hname=master1 ip=192.168.160.9  weight=100 keepalived=MASTER
+192.168.160.10 hname=master2 ip=192.168.160.10 weight=99  keepalived=BACKUP
+192.168.160.11 hname=master3 ip=192.168.160.11 weight=98  keepalived=BACKUP
+
+[k8sm:vars]
+m1=192.168.160.9
+m2=192.168.160.10
+m3=192.168.160.11
+vip=192.168.160.8
+
+[k8sm1]
+192.168.160.9 
+
+[k8sm1:vars]
+m1=192.168.160.9
+vip=192.168.160.8
+
+[k8s]
+192.168.160.9  hname=master1
+192.168.160.10 hname=master2
+192.168.160.11 hname=master3
+192.168.160.12 hname=node1
+192.168.160.13 hname=node2
+
+[k8s:vars]
+m1=192.168.160.9
+m2=192.168.160.10
+m3=192.168.160.11
+n1=192.168.160.12
+n2=192.168.160.13

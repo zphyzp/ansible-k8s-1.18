@@ -1,0 +1,21 @@
+---
+- hosts: k8s
+  remote_user: root
+
+  tasks:
+    - name: install k8s package
+      yum:
+        state: present
+        name: ['kubeadm-1.15.1', 'kubectl-1.15.1 ', 'kubelet-1.15.1']
+    - name: start kubelet service
+      service: name=kubelet state=started enabled=yes
+    - name: pull k8s
+      copy: src=file/{{ item }} dest=/root/{{ item }}
+      with_items:
+        - pull.sh
+        - tag.sh
+    - name: pull k8s script
+      shell: sh /root/{{ item }}
+      with_items:
+        - pull.sh
+        - tag.sh

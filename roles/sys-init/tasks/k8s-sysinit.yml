@@ -1,0 +1,90 @@
+    - name: copy hosts
+      template: src=templates/hosts.j2 dest=/etc/hosts
+    - name: set hostname
+      shell: hostnamectl set-hostname k8s-{{ hname }}
+    - name: touch direcotry
+      file: path=/etc/yum.repos.d/old state=directory
+    - name: yum conf
+      shell: "mv /etc/yum.repos.d/Cent* /etc/yum.repos.d/old/"
+    - name: yum init
+      copy: src=files/Centos-7.repo dest=/etc/yum.repos.d/Centos-7.repo
+    - name: install package
+      yum: 
+        state: present
+        name: ['conntrack', 'ntpdate', 'ntp', 'ipvsadm', 'iptables', 'curl', 'sysstat', 'libseccomp', 'wget', 'vim', 'net-tools', 'git', 'iptables-services', 'yum-utils', 'device-mapper-persistent-data', 'lvm2']
+      ignore_errors: yes
+    - name: stop firewalld
+      service: name=firewalld state=stopped enabled=yes
+    - name: start iptables-services
+      service: name=iptables state=started enabled=yes
+    - name: iptables-services
+      shell: 'iptables -F'  
+    - name: iptables-service2
+      shell: 'service iptables save'
+    - name: copy off
+      copy: src=files/off.sh dest=/root/off.sh
+    - name: chmod off
+      shell: 'chmod +x /root/off.sh'
+    - name: sh off
+      shell: '/root/off.sh'
+    - name: copy kube file
+      copy: src=files/kubernetes.conf dest=/etc/sysctl.d/kubernetes.conf
+    - name: br_netfilterl
+      shell: modprobe br_netfilter
+    - name: sysctl kubernetes.conf
+      shell: 'sysctl -p /etc/sysctl.d/kubernetes.conf' 
+    - name: set time1
+      shell: 'timedatectl set-timezone Asia/Shanghai' 
+    - name: set time2
+      shell: 'timedatectl set-local-rtc 0'
+    - name: time service
+      service: name={{ item }} state=restarted        
+      with_items:
+        - rsyslog
+        - crond
+    - name: stop service
+      service: name=postfix state=stopped enabled=no
+    - name: touch direcotry journal
+      file: path=/var/log/journal state=directory
+    - name: touch direcotry journald.conf.d
+      file: path=/etc/systemd/journald.conf.d state=directory
+    - name: copy file 99-prophet.conf
+      copy: src=files/99-prophet.conf dest=/etc/systemd/journald.conf.d/99-prophet.conf
+    - name: systemd-journald service
+      service: name=systemd-journald state=started
+    - name: copy file kernel
+      copy: src=files/kernel.rpm dest=/root/kernel.rpm
+    - name: install kernel
+      yum: name=/root/kernel.rpm
+    - name: boot kernel
+      shell: "grub2-set-default 'CentOS Linux (4.18.9-1.el7.elrepo.x86_64) 7 (Core)'"
+    - name: copy ipvsconf
+      copy: src=files/ipvs.modules  dest=/etc/sysconfig/modules/ipvs.modules 
+    - name: chmod ipvs
+      shell: chmod 755 /etc/sysconfig/modules/ipvs.modules
+    - name: bash ipvs
+      shell: bash /etc/sysconfig/modules/ipvs.modules
+    - name: docker aliyun
+      shell: "yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo"
+    - name: docker aliyun
+      shell: "mkdir -p /etc/systemd/system/docker.service.d"    
+    - name: yum docker
+      yum: name=docker-ce
+    - name: start docker
+      service: name=docker state=started enabled=yes
+    - name: copy docker jason
+      copy: src=files/daemon.json dest=/etc/docker/daemon.json
+    - name: daemon reload
+      shell: systemctl daemon-reload
+    - name: restart docker
+      service: name=docker state=restarted enabled=yes
+    - name: boot kernel2
+      shell: "grub2-set-default 'CentOS Linux (4.18.9-1.el7.elrepo.x86_64) 7 (Core)'"
+    - name: copy docker jason
+      copy: src=files/kubernetes.repo dest=/etc/yum.repos.d/kubernetes.repo
+    - name: install k8s package
+      yum:
+        state: present
+        name: ['kubeadm-1.18.0', 'kubectl-1.18.0 ', 'kubelet-1.18.0']
+    - name: start kubelet service
+      service: name=kubelet state=started enabled=yes

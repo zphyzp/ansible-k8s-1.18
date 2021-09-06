@@ -1,0 +1,14 @@
+    - name: install package
+      yum: 
+        state: present
+        name: ['haproxy', 'keepalived' ]
+    - name: copy keepalived conf
+      template: src=templates/keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf
+    - name: copy haproxy conf
+      template: src=templates/haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+    - name: copy check conf
+      copy: src=files/check_haproxy.sh  dest=/etc/keepalived/check_haproxy.sh
+    - name: start keepalived
+      service: name=keepalived state=started enabled=yes
+    - name: start haproxy
+      service: name=haproxy state=started enabled=yes

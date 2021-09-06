@@ -1,0 +1,9 @@
+{
+"exec-opts": ["native.cgroupdriver=systemd"],
+"log-driver": "json-file",
+"log-opts": {
+"max-size": "100m"
+  },
+ "insecure-registries": ["https://hub.zptest.com"],
+ "registry-mirrors": ["https://jg90wp28.mirror.aliyuncs.com"]
+}

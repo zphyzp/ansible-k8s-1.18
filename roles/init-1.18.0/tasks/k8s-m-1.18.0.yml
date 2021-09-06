@@ -1,0 +1,14 @@
+    - name: install k8s package
+      yum:
+        state: present
+        name: ['kubeadm-1.18.0', 'kubectl-1.18.0 ', 'kubelet-1.18.0']
+    - name: start kubelet service
+      service: name=kubelet state=started enabled=yes
+    - name: scp k8s
+      template: src=templates/kubeadm-config.yaml.j2 dest=/root/kubeadm-config.yaml
+    - name: scp k8s-conf
+      copy: src=files/init-1.18.0.sh dest=/root/init-1.18.0.sh
+    - name: init k8s script
+      shell: sh /root/init-1.18.0.sh
+    - name: scp kannel
+      copy: src=files/kube-flannel.yml dest=/root/kube-flannel.yml

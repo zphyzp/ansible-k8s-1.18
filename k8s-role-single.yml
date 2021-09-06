@@ -1,0 +1,10 @@
+---
+ - hosts: k8s
+   remote_user: root
+   roles:
+     - role: sys-init
+
+ - hosts: k8sm1
+   remote_user: root
+   roles:
+     - role: init-single-1.18.0
